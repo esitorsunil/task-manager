@@ -1,0 +1,17 @@
+.btn-sidebar {
+  background-color: white;
+  border: none;
+  color: #0d6efd;
+  padding: 10px 12px;
+  transition: background-color 0.2s ease;
+}
+
+
+.sidebar {
+       background-color: #f7f7fa!important; /* Light gray background for sidebar */
+}
+
+.btn-sidebar:hover {
+  background-color: #e2e6ea!important; /* Light gray (secondary hover effect) */
+  color: #0d6efd;
+}
