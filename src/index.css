@@ -8,11 +8,11 @@
 
 
 .sidebar {
-       background-color: #f7f7fa!important; /* Light gray background for sidebar */
+       background-color: #f7f7fa!important;
 }
 
 .btn-sidebar:hover {
-  background-color: #e2e6ea!important; /* Light gray (secondary hover effect) */
+  background-color: #e2e6ea!important; 
   color: #0d6efd;
 }
 
