@@ -15,3 +15,34 @@
   background-color: #e2e6ea!important; /* Light gray (secondary hover effect) */
   color: #0d6efd;
 }
+
+.custom-input-group .form-control:focus,
+  .custom-input-group .input-group-text:focus {
+    box-shadow: none;
+    outline: none;
+  }
+
+  .custom-input-group:focus-within {
+    border: 1px solid #0d6efd;
+    border-radius: 0.375rem;
+  }
+
+  .custom-input-group {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    max-width: 200px;
+  
+  }
+
+  .custom-input-group .input-group-text,
+  .custom-input-group .form-control {
+    border: none;
+    background-color: transparent;
+  }
+
+  .custom-input-group .form-control:focus {
+    box-shadow: none;
+  }

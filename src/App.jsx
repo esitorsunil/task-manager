@@ -3,7 +3,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 import Recommend from './pages/Recommend';
-import Layout from './pages/Task';
+import Layout from './components/Layout';
 import MyTask from './pages/MyTask';
 import AllTask from './pages/AllTask';
 import StarredTask from './pages/StarredTask';
