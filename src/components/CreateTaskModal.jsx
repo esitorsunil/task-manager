@@ -35,7 +35,7 @@ const CreateTaskModal = () => {
           <div className="modal-header flex-column align-items-start">
             <div className="d-flex w-100 justify-content-between">
               <h5 className="modal-title">
-                <i className="bi bi-card-checklist me-2"></i>Create Task
+                <i className="bi bi-card-checklist fw-bold me-2"></i>Create Task
               </h5>
               <button
                 type="button"
@@ -53,7 +53,7 @@ const CreateTaskModal = () => {
           <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
             <div className="row mb-3 border-bottom pb-3">
               <div className="col-md-6">
-                <label htmlFor="dueDate" className="form-label">Due Date</label>
+                <label htmlFor="dueDate" className="form-label fw-semibold">Due Date</label>
                 <input 
                   type="date" 
                   className="form-control" 
@@ -61,7 +61,7 @@ const CreateTaskModal = () => {
                 />
               </div>
               <div className="col-md-6">
-                <label htmlFor="assignee" className="form-label">Assignees</label>
+                <label htmlFor="assignee" className="form-label fw-semibold">Assignees</label>
                 <select className="form-select" id="assignee">
                   <option value="">Select assignee</option>
                   <option value="1">John Doe</option>
@@ -74,7 +74,7 @@ const CreateTaskModal = () => {
             </div>
 
             <div className="mb-3 border-bottom pb-3">
-              <label htmlFor="description" className="form-label">Description</label>
+              <label htmlFor="description" className="form-label fw-semibold">Description</label>
               <textarea 
                 className="form-control" 
                 id="description" 
@@ -84,7 +84,7 @@ const CreateTaskModal = () => {
             </div>
 
             <div className="mb-3 border-bottom pb-3">
-              <label className="form-label">Attachments {files.length > 0 && (
+              <label className="form-label fw-semibold">Attachments {files.length > 0 && (
                 <span>({files.length})</span>
               )}</label>
               <div className="d-flex align-items-center justify-content-between">
@@ -145,7 +145,7 @@ const CreateTaskModal = () => {
             </div>
 
             <div className="mb-3 border-bottom pb-3">
-              <label className="form-label">Status</label>
+              <label className="form-label fw-semibold">Status</label>
               <div className="dropdown">
                 <button
                   className="btn border border-radius dropdown-toggle w-40 text-start"
@@ -166,7 +166,7 @@ const CreateTaskModal = () => {
             </div>
 
             <div className="mb-3 border-bottom pb-3">
-              <label className="form-label">Priority</label>
+              <label className="form-label fw-semibold">Priority</label>
               <div className="dropdown">
                 <button
                   className="btn border rounded dropdown-toggle w-40 text-start"
@@ -187,7 +187,7 @@ const CreateTaskModal = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Visibility</label>
+              <label className="form-label fw-semibold">Visibility</label>
               <div className="border rounded p-3">
                 <div className="form-check mb-2">
                   <input
@@ -217,6 +217,17 @@ const CreateTaskModal = () => {
                 </div>
               </div>
             </div>
+             <div className="col-md-6">
+                <label htmlFor="collaborators" className="form-label fw-semibold">Collaborators</label>
+                <select className="form-select" id="collaborators">
+                  <option value="">Select collaborator</option>
+                  <option value="1">Sunil</option>
+                  <option value="2">Sunil2</option>
+                  <option value="3">Sunil1</option>
+                  <option value="4">Sunil4</option>
+                  <option value="5">Sunil5</option>
+                </select>
+              </div>
           </div>
 
           <div className="modal-footer">

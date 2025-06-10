@@ -1,18 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 
-const dummyEmployees = [
-  { id: 1, name: 'Alice Johnson', role: 'Engineer' },
-  { id: 2, name: 'Bob Smith', role: 'Designer' },
-  { id: 3, name: 'Charlie Brown', role: 'Product Manager' },
-  { id: 4, name: 'David Williams', role: 'Developer' },
-  { id: 5, name: 'Ella Davis', role: 'QA Analyst' },
-  { id: 6, name: 'Frank Miller', role: 'HR' },
-  { id: 7, name: 'Grace Lee', role: 'Engineer' },
-  { id: 8, name: 'Henry Wilson', role: 'Support' },
-  { id: 9, name: 'Isla Moore', role: 'Marketing' },
-  { id: 10, name: 'Jack Taylor', role: 'Finance' },
-];
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('collabUser'));
