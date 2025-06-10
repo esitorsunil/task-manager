@@ -1,8 +1,11 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useModalStore } from '../utils/modalStore';
+import CreateTaskModal from './CreateTaskModal';
 
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { openModal } = useModalStore();
 
   const isActive = (path) => location.pathname === path;
 
@@ -15,10 +18,31 @@ const Layout = () => {
         >
           <div className="sidebar-header mb-4 mt-3 d-flex justify-content-between align-items-center">
             <h5 className="mb-0">Tasks</h5>
-            <i
-              className="bi bi-plus-lg bg-primary text-white fs-5 ps-1 pe-1 rounded"
-              role="button"
-            ></i>
+        <div
+          className="position-relative d-inline-block"
+          onMouseEnter={() => document.getElementById('tooltip-create').style.display = 'block'}
+          onMouseLeave={() => document.getElementById('tooltip-create').style.display = 'none'}
+        >
+          <i
+            className="bi bi-plus-lg bg-primary text-white fs-5 ps-1 pe-1 rounded"
+            role="button"
+             onClick={openModal}
+          ></i>
+             <CreateTaskModal />
+          <div
+            id="tooltip-create"
+            className="position-absolute top-100 start-50 translate-middle-x mt-1 px-2 py-1 rounded shadow-sm border text-dark"
+            style={{
+              backgroundColor: 'white',
+              fontSize: '12px',
+              whiteSpace: 'nowrap',
+              zIndex: 999,
+              display: 'none',
+            }}
+          >
+            Create Task
+          </div>
+          </div>
           </div>
 
           <ul className="nav flex-column">
