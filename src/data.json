@@ -10,5 +10,17 @@
     { "id": 8, "username": "collab8", "password": "pass8" },
     { "id": 9, "username": "collab9", "password": "pass9" },
     { "id": 10, "username": "collab10", "password": "pass10" }
+  ],
+  "dummyEmployees": [
+    { "id": 1, "name": "employee1", "email": "employee1@example.com" },
+    { "id": 2, "name": "employee2", "email": "employee2@example.com" },
+    { "id": 3, "name": "employee3", "email": "employee3@example.com" },
+    { "id": 4, "name": "employee4", "email": "employee4@example.com" },
+    { "id": 5, "name": "employee5", "email": "employee5@example.com" },
+    { "id": 6, "name": "employee6", "email": "employee6@example.com" },
+    { "id": 7, "name": "employee7", "email": "employee7@example.com" },
+    { "id": 8, "name": "employee8", "email": "employee8@example.com" },
+    { "id": 9, "name": "employee9", "email": "employee9@example.com" },
+    { "id": 10, "name": "employee10", "email": "employee10@example.com" }
   ]
 }
