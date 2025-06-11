@@ -4,6 +4,7 @@ import attachmentsReducer from './attachmentsSlice';
 const store = configureStore({
   reducer: {
     attachments: attachmentsReducer,
+ 
   },
 });
 

@@ -1,0 +1,14 @@
+{
+  "dummyCollaborators": [
+    { "id": 1, "username": "sunil", "password": "password1" },
+    { "id": 2, "username": "collab2", "password": "pass2" },
+    { "id": 3, "username": "collab3", "password": "pass3" },
+    { "id": 4, "username": "collab4", "password": "pass4" },
+    { "id": 5, "username": "collab5", "password": "pass5" },
+    { "id": 6, "username": "collab6", "password": "pass6" },
+    { "id": 7, "username": "collab7", "password": "pass7" },
+    { "id": 8, "username": "collab8", "password": "pass8" },
+    { "id": 9, "username": "collab9", "password": "pass9" },
+    { "id": 10, "username": "collab10", "password": "pass10" }
+  ]
+}

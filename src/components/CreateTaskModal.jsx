@@ -1,247 +1,226 @@
 import { useModalStore } from '../utils/modalStore';
-import { useDispatch, useSelector } from 'react-redux';
-import { addFiles, removeFile } from '../utils/attachmentsSlice';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useForm, Controller } from 'react-hook-form';
+import Select from 'react-select';
+import data from '../data.json';
 
 const CreateTaskModal = () => {
   const { isOpen, closeModal } = useModalStore();
+  const [collaboratorOptions, setCollaboratorOptions] = useState([]);
   const [isFileListVisible, setIsFileListVisible] = useState(true);
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedPriority, setSelectedPriority] = useState("");
-  const [visibility, setVisibility] = useState("assignees");
 
-  const dispatch = useDispatch();
-  const files = useSelector((state) => state.attachments.files);
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    setValue,
+    formState: { errors, isValid }
+  } = useForm({
+    mode: 'onChange',
+    defaultValues: {
+      taskTitle: '',
+      dueDate: '',
+      description: '',
+      status: '',
+      priority: '',
+      visibility: 'assignees',
+      assignees: [],
+      collaborators: [],
+      files: []
+    }
+  });
+
+  const watchedFiles = watch('files');
+
+  useEffect(() => {
+    const mappedOptions = data.dummyCollaborators.map((c) => ({
+      value: c.id,
+      label: c.username,
+    }));
+    setCollaboratorOptions(mappedOptions);
+  }, []);
+
+  const onSubmit = (formData) => {
+    const taskData = {
+      id: uuidv4(),
+      ...formData,
+      attachments: formData.files.map((file) => file.name),
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem("tasks")) || [];
+      localStorage.setItem("tasks", JSON.stringify([...existing, taskData]));
+      alert("Task created successfully!");
+      closeModal();
+      reset();
+    } catch (err) {
+      console.error("Failed to save task", err);
+      alert("An error occurred while saving the task.");
+    }
+  };
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files);
-    dispatch(addFiles(newFiles));
+    setValue('files', [...watchedFiles, ...newFiles], { shouldValidate: true });
     e.target.value = null;
   };
 
   const handleRemoveFile = (filename) => {
-    dispatch(removeFile(filename));
+    const updated = watchedFiles.filter((file) => file.name !== filename);
+    setValue('files', updated);
   };
 
   return (
-    <div
-      className={`modal fade ${isOpen ? 'show d-block' : ''}`}
-      tabIndex="-1"
-      role="dialog"
-      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-    >
+    <div className={`modal fade ${isOpen ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
-          <div className="modal-header flex-column align-items-start">
-            <div className="d-flex w-100 justify-content-between">
-              <h5 className="modal-title">
-                <i className="bi bi-card-checklist fw-bold me-2"></i>Create Task
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={closeModal}
-              ></button>
-            </div>
-            <input
-              type="text"
-              className="form-control mt-3"
-              placeholder="Enter task title"
-            />
-          </div>
-
-          <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-            <div className="row mb-3 border-bottom pb-3">
-              <div className="col-md-6">
-                <label htmlFor="dueDate" className="form-label fw-semibold">Due Date</label>
-                <input 
-                  type="date" 
-                  className="form-control" 
-                  id="dueDate" 
-                />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="modal-header flex-column align-items-start">
+              <div className="d-flex w-100 justify-content-between">
+                <h5 className="modal-title">
+                  <i className="bi bi-card-checklist fw-bold me-2"></i>Create Task
+                </h5>
+                <button type="button" className="btn-close" onClick={closeModal}></button>
               </div>
-              <div className="col-md-6">
-                <label htmlFor="assignee" className="form-label fw-semibold">Assignees</label>
-                <select className="form-select" id="assignee">
-                  <option value="">Select assignee</option>
-                  <option value="1">John Doe</option>
-                  <option value="2">Jane Smith</option>
-                  <option value="3">Mike Johnson</option>
-                  <option value="4">Sarah Williams</option>
-                  <option value="5">David Brown</option>
-                </select>
-              </div>
+              <input
+                type="text"
+                className="form-control mt-3"
+                placeholder="Enter task title"
+                {...register('taskTitle', { required: true })}
+              />
+              {errors.taskTitle && <small className="text-danger">Task title is required</small>}
             </div>
 
-            <div className="mb-3 border-bottom pb-3">
-              <label htmlFor="description" className="form-label fw-semibold">Description</label>
-              <textarea 
-                className="form-control" 
-                id="description" 
-                rows="4" 
-                placeholder="Enter task description"
-              ></textarea>
-            </div>
-
-            <div className="mb-3 border-bottom pb-3">
-              <label className="form-label fw-semibold">Attachments {files.length > 0 && (
-                <span>({files.length})</span>
-              )}</label>
-              <div className="d-flex align-items-center justify-content-between">
-                <div className="d-flex align-items-center">
-                  <label htmlFor="attachments" className="btn btn-outline-secondary me-2">
-                    <i className="bi bi-plus-lg me-2"></i>Add Attachment
-                  </label>
-                  <input
-                    type="file"
-                    className="d-none"
-                    id="attachments"
-                    multiple
-                    onChange={handleFileChange}
+            <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              <div className="row mb-3 border-bottom pb-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Due Date</label>
+                  <input type="date" className="form-control" {...register('dueDate')} />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Assignees</label>
+                  <Controller
+                    name="assignees"
+                    control={control}
+                    render={({ field }) => <Select isMulti options={collaboratorOptions} {...field} />}
                   />
-                  {files.length > 0 && (
-                    <button
-                      type="button"
-                      className="btn btn-link text-secondary p-0"
-                      onClick={() => setIsFileListVisible(!isFileListVisible)}
-                      title={isFileListVisible ? "Hide files" : "Show files"}
-                    >
-                      <i className={`bi bi-chevron-${isFileListVisible ? 'up' : 'down'}`}></i>
-                    </button>
-                  )}
-                </div>  
+                </div>
               </div>
 
-              {isFileListVisible && files.length > 0 && (
-                <div className="mt-2 mb-0">
-                  <div className="d-flex flex-wrap gap-2">
-                    {files.map((file, index) => (
-                      <div 
-                        key={index} 
-                        className="border rounded p-2 d-flex align-items-center"
-                        style={{
-                          width: "calc(50% - 0.5rem)",
-                          minWidth: "calc(50% - 0.5rem)",
-                          maxWidth: "calc(50% - 0.5rem)"
-                        }}
+              <div className="mb-3 border-bottom pb-3">
+                <label className="form-label fw-semibold">Description</label>
+                <textarea className="form-control" rows="4" {...register('description')} placeholder="Enter task description" />
+              </div>
+
+              <div className="mb-3 border-bottom pb-3">
+                <label className="form-label fw-semibold">Attachments {watchedFiles.length > 0 && <span>({watchedFiles.length})</span>}</label>
+                <div className="d-flex align-items-center justify-content-between">
+                  <div className="d-flex align-items-center">
+                    <label htmlFor="attachments" className="btn btn-outline-secondary me-2">
+                      <i className="bi bi-plus-lg me-2"></i>Add Attachment
+                    </label>
+                    <input type="file" className="d-none" id="attachments" multiple onChange={handleFileChange} />
+                    {watchedFiles.length > 0 && (
+                      <button
+                        type="button"
+                        className="btn btn-link text-secondary p-0"
+                        onClick={() => setIsFileListVisible(!isFileListVisible)}
+                        title={isFileListVisible ? "Hide files" : "Show files"}
                       >
-                        <i className="bi bi-file-earmark me-2"></i>
-                        <span className="text-truncate flex-grow-1" style={{maxWidth: "calc(100% - 60px)"}}>
-                          {file.name}
-                        </span>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-link text-secondary p-0 ms-2"
-                          onClick={() => handleRemoveFile(file.name)}
-                          title="Remove file"
-                        >
-                          <i className="bi bi-trash"></i>
-                        </button>
-                      </div>
-                    ))}
+                        <i className={`bi bi-chevron-${isFileListVisible ? 'up' : 'down'}`}></i>
+                      </button>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
 
-            <div className="mb-3 border-bottom pb-3">
-              <label className="form-label fw-semibold">Status</label>
-              <div className="dropdown">
-                <button
-                  className="btn border border-radius dropdown-toggle w-40 text-start"
-                  type="button"
-                  id="statusDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  {selectedStatus || "Select status"}
-                </button>
-                <ul className="dropdown-menu w-100" aria-labelledby="statusDropdown">
-                  <li><button className="dropdown-item" onClick={() => setSelectedStatus("To Do")}>To Do</button></li>
-                  <li><button className="dropdown-item" onClick={() => setSelectedStatus("In Progress")}>In Progress</button></li>
-                  <li><button className="dropdown-item" onClick={() => setSelectedStatus("Blocked")}>Blocked</button></li>
-                  <li><button className="dropdown-item" onClick={() => setSelectedStatus("Done")}>Done</button></li>
-                </ul>
+                {isFileListVisible && watchedFiles.length > 0 && (
+                  <div className="mt-2 mb-0">
+                    <div className="d-flex flex-wrap gap-2">
+                      {watchedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="border rounded p-2 d-flex align-items-center"
+                          style={{ width: "calc(50% - 0.5rem)" }}
+                        >
+                          <i className="bi bi-file-earmark me-2"></i>
+                          <span className="text-truncate flex-grow-1" style={{ maxWidth: "calc(100% - 60px)" }}>{file.name}</span>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-link text-secondary p-0 ms-2"
+                            onClick={() => handleRemoveFile(file.name)}
+                          >
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
 
-            <div className="mb-3 border-bottom pb-3">
-              <label className="form-label fw-semibold">Priority</label>
-              <div className="dropdown">
-                <button
-                  className="btn border rounded dropdown-toggle w-40 text-start"
-                  type="button"
-                  id="priorityDropdown"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  {selectedPriority || "Select priority"}
-                </button>
-                <ul className="dropdown-menu w-40" aria-labelledby="priorityDropdown">
-                  <li><button className="dropdown-item" onClick={() => setSelectedPriority("High")}>High</button></li>
-                  <li><button className="dropdown-item" onClick={() => setSelectedPriority("Urgent")}>Urgent</button></li>
-                  <li><button className="dropdown-item" onClick={() => setSelectedPriority("Medium")}>Medium</button></li>
-                  <li><button className="dropdown-item" onClick={() => setSelectedPriority("Low")}>Low</button></li>
-                </ul>
+              <div className="mb-3 border-bottom pb-3">
+                <label className="form-label fw-semibold">Status</label>
+                <Controller
+                  name="status"
+                  control={control}
+                  render={({ field }) => (
+                    <select className="form-select" {...field}>
+                      <option value="">Select status</option>
+                      {['To Do', 'In Progress', 'Blocked', 'Done'].map((status) => (
+                        <option key={status} value={status}>{status}</option>
+                      ))}
+                    </select>
+                  )}
+                />
               </div>
-            </div>
 
-            <div className="mb-3">
-              <label className="form-label fw-semibold">Visibility</label>
-              <div className="border rounded p-3">
-                <div className="form-check mb-2">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="visibility"
-                    id="visibilityAssignees"
-                    checked={visibility === "assignees"}
-                    onChange={() => setVisibility("assignees")}
-                  />
-                  <label className="form-check-label" htmlFor="visibilityAssignees">
-                    Only assignees and collaborators
-                  </label>
+              <div className="mb-3 border-bottom pb-3">
+                <label className="form-label fw-semibold">Priority</label>
+                <Controller
+                  name="priority"
+                  control={control}
+                  render={({ field }) => (
+                    <select className="form-select" {...field}>
+                      <option value="">Select priority</option>
+                      {['High', 'Urgent', 'Medium', 'Low'].map((priority) => (
+                        <option key={priority} value={priority}>{priority}</option>
+                      ))}
+                    </select>
+                  )}
+                />
+              </div>
+
+              <div className="mb-3 border-bottom pb-3">
+                <label className="form-label fw-semibold">Visibility</label>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" value="assignees" {...register('visibility')} checked={watch('visibility') === 'assignees'} />
+                  <label className="form-check-label">Only assignees and collaborators</label>
                 </div>
                 <div className="form-check">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="visibility"
-                    id="visibilityCompany"
-                    checked={visibility === "company"}
-                    onChange={() => setVisibility("company")}
-                  />
-                  <label className="form-check-label" htmlFor="visibilityCompany">
-                    Anyone at your company
-                  </label>
+                  <input className="form-check-input" type="radio" value="company" {...register('visibility')} checked={watch('visibility') === 'company'} />
+                  <label className="form-check-label">Anyone at your company</label>
                 </div>
               </div>
-            </div>
-             <div className="col-md-6">
-                <label htmlFor="collaborators" className="form-label fw-semibold">Collaborators</label>
-                <select className="form-select" id="collaborators">
-                  <option value="">Select collaborator</option>
-                  <option value="1">Sunil</option>
-                  <option value="2">Sunil2</option>
-                  <option value="3">Sunil1</option>
-                  <option value="4">Sunil4</option>
-                  <option value="5">Sunil5</option>
-                </select>
-              </div>
-          </div>
 
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={closeModal}
-            >
-              Close
-            </button>
-            <button type="button" className="btn btn-primary">
-              Create Task
-            </button>
-          </div>
+              <div className="mb-3">
+                <label className="form-label fw-semibold">Collaborators</label>
+                <Controller
+                  name="collaborators"
+                  control={control}
+                  render={({ field }) => <Select isMulti options={collaboratorOptions} {...field} />}
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn btn-secondary" type="button" onClick={closeModal}>Close</button>
+              <button className="btn btn-primary" type="submit" disabled={!isValid}>Create Task</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
