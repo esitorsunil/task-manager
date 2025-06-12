@@ -7,6 +7,7 @@ import Layout from './components/Layout';
 import MyTask from './pages/MyTask';
 import AllTask from './pages/AllTask';
 import StarredTask from './pages/StarredTask';
+import CompletedTasks from './pages/CompletedTasks';
 
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = localStorage.getItem('collabUser');
@@ -28,6 +29,7 @@ const App = () => {
   <Route path="my" element={<MyTask />} />
   <Route path="all" element={<AllTask />} />
   <Route path="starred" element={<StarredTask />} />
+   <Route path="completed" element={<CompletedTasks />} />
 </Route>
 
         <Route path="*" element={<NotFound />} />

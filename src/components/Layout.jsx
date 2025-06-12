@@ -78,6 +78,14 @@ const Layout = () => {
                 <i className="bi bi-star"></i> Starred Tasks
               </button>
             </li>
+            <li className="nav-item mb-2">
+              <button
+                className={`btn btn-sidebar w-100 text-start d-flex align-items-center gap-2 ${isActive('/tasks/completed') ? 'bg-primary text-white' : ''}`}
+                onClick={() => navigate('/tasks/completed')}
+              >
+                <i className="bi bi-calendar2-check"></i> Completed Tasks
+              </button>
+            </li>
           </ul>
         </div>
 

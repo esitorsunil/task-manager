@@ -3,6 +3,7 @@ import TaskTable from '../components/TaskTable';
 
 const AllTask = () => {
   const [tasks, setTasks] = useState([]);
+  
 
   useEffect(() => {
     const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];

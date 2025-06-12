@@ -4,22 +4,40 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
   const [selectedTasks, setSelectedTasks] = useState([]);
 
   const handleTaskCompletion = (taskId) => {
-    const updated = tasks.map((t) =>
+    const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    const updatedAllTasks = allTasks.map((t) =>
       t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t
     );
-    setTasks(updated);
-    localStorage.setItem('tasks', JSON.stringify(updated));
+    localStorage.setItem('tasks', JSON.stringify(updatedAllTasks));
+
+    const updatedTask = updatedAllTasks.find((t) => t.id === taskId);
+    let starredTasks = JSON.parse(localStorage.getItem('starredTasks')) || [];
+
+    if (starredTasks.some((t) => t.id === updatedTask.id)) {
+      starredTasks = starredTasks.map((t) =>
+        t.id === updatedTask.id ? updatedTask : t
+      );
+      localStorage.setItem('starredTasks', JSON.stringify(starredTasks));
+    }
+
+    const updatedVisibleTasks = tasks.map((t) =>
+      t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t
+    );
+    setTasks(updatedVisibleTasks);
   };
 
   const handleStarToggle = (taskId) => {
-    const updated = tasks.map((t) =>
+    const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    const updatedAllTasks = allTasks.map((t) =>
       t.id === taskId ? { ...t, isStarred: !t.isStarred } : t
     );
-    setTasks(updated);
-    localStorage.setItem('tasks', JSON.stringify(updated));
+    localStorage.setItem('tasks', JSON.stringify(updatedAllTasks));
 
-    const updatedTask = updated.find((t) => t.id === taskId);
+    const updatedTask = updatedAllTasks.find((t) => t.id === taskId);
     let starredTasks = JSON.parse(localStorage.getItem('starredTasks')) || [];
+
     if (updatedTask.isStarred) {
       if (!starredTasks.some((t) => t.id === updatedTask.id)) {
         starredTasks.push(updatedTask);
@@ -27,7 +45,13 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
     } else {
       starredTasks = starredTasks.filter((t) => t.id !== updatedTask.id);
     }
+
     localStorage.setItem('starredTasks', JSON.stringify(starredTasks));
+
+    const updatedVisibleTasks = tasks.map((t) =>
+      t.id === taskId ? { ...t, isStarred: !t.isStarred } : t
+    );
+    setTasks(updatedVisibleTasks);
   };
 
   const handleSelectionToggle = (taskId) => {
@@ -37,20 +61,34 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
     setSelectedTasks(updated);
   };
 
+  const handleSelectAllToggle = () => {
+    if (selectedTasks.length === tasks.length) {
+      setSelectedTasks([]);
+    } else {
+      const allIds = tasks.map((t) => t.id);
+      setSelectedTasks(allIds);
+    }
+  };
+
   const handleDelete = () => {
-  const updatedTasks = tasks.filter((t) => !selectedTasks.includes(t.id));
-  setTasks(updatedTasks);
-  localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const updatedAllTasks = allTasks.filter(
+      (t) => !selectedTasks.includes(t.id)
+    );
+    localStorage.setItem('tasks', JSON.stringify(updatedAllTasks));
 
-  // Update starredTasks in localStorage
-  const starredTasks = JSON.parse(localStorage.getItem('starredTasks')) || [];
-  const updatedStarredTasks = starredTasks.filter(
-    (t) => !selectedTasks.includes(t.id)
-  );
-  localStorage.setItem('starredTasks', JSON.stringify(updatedStarredTasks));
+    const starredTasks = JSON.parse(localStorage.getItem('starredTasks')) || [];
+    const updatedStarredTasks = starredTasks.filter(
+      (t) => !selectedTasks.includes(t.id)
+    );
+    localStorage.setItem('starredTasks', JSON.stringify(updatedStarredTasks));
 
-  setSelectedTasks([]);
-};
+    const updatedVisibleTasks = tasks.filter(
+      (t) => !selectedTasks.includes(t.id)
+    );
+    setTasks(updatedVisibleTasks);
+    setSelectedTasks([]);
+  };
 
   return (
     <>
@@ -72,7 +110,19 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
                 className="py-3 px-3"
               >
                 <div className="d-flex align-items-center gap-2 me-6">
-                  {showSelection && <i className="bi bi-square fs-6"></i>}
+                  {showSelection && (
+                    <i
+  className={`bi fs-5 cursor-pointer ${
+    selectedTasks.length === tasks.length
+      ? 'bi-check-square-fill text-success'
+      : selectedTasks.length > 0
+      ? 'bi-dash-square-fill text-primary'
+      : 'bi-square'
+  }`}
+  onClick={handleSelectAllToggle}
+  title="Select All"
+/>
+                  )}
                   <span style={{ minWidth: '300px', whiteSpace: 'nowrap' }}>
                     Tasks
                   </span>
