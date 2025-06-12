@@ -1,41 +1,29 @@
-import { useEffect, useState } from 'react';
+// src/pages/StarredTask.jsx
 import TaskTable from '../components/TaskTable';
+import { useTaskStore } from '../utils/useTaskStore';
+import FilterPanel from '../components/FilterPanel';
+import { useEffect } from 'react';
 
 const StarredTask = () => {
-  const [starredTasks, setStarredTasks] = useState([]);
-  const [filteredTasks, setFilteredTasks] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const {
+    setAllTasks,
+    setSearchQuery,
+    searchQuery,
+    getFilteredTasks,
+  } = useTaskStore();
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('starredTasks')) || [];
-    setStarredTasks(stored);
-    setFilteredTasks(stored);
-  }, []);
+    setAllTasks(stored);
+  }, [setAllTasks]);
 
-  useEffect(() => {
-    let filtered = [...starredTasks];
-
-    if (searchQuery) {
-      filtered = filtered.filter((task) =>
-        task.taskTitle.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter) {
-      filtered = filtered.filter((task) =>
-        statusFilter === 'completed' ? task.isCompleted : !task.isCompleted
-      );
-    }
-
-    setFilteredTasks(filtered);
-  }, [searchQuery, statusFilter, starredTasks]);
+  const filteredTasks = getFilteredTasks();
 
   return (
     <div>
       <h5>Starred Tasks</h5>
 
-      <div className="d-flex justify-content-between align-items-center my-3 mt-5 flex-wrap gap-3">
+      <div className="d-flex justify-content-between align-items-center my-3 mt-5 flex-wrap gap-3 ">
         <div
           className="custom-input-group d-flex align-items-center"
           style={{ minWidth: '100px' }}
@@ -53,24 +41,23 @@ const StarredTask = () => {
           />
         </div>
 
-        <div className="d-flex gap-3">
-          <select
-            className="form-select"
-            aria-label="Filter tasks"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Tasks</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-          </select>
-        </div>
+        <FilterPanel />
       </div>
 
       {filteredTasks.length === 0 ? (
-        <p>No starred tasks.</p>
+        <div
+          className="d-flex flex-column align-items-center justify-content-center"
+          style={{ minHeight: '300px' }}
+        >
+          <img
+            src="../../../public/download.svg"
+            alt="No Data"
+            style={{ maxWidth: '300px', height: 'auto', marginBottom: '1rem' }}
+          />
+          <p className="text-muted">No Data</p>
+        </div>
       ) : (
-        <TaskTable tasks={filteredTasks} setTasks={setFilteredTasks} showSelection={true} />
+        <TaskTable tasks={filteredTasks} setTasks={() => {}} showSelection={true} />
       )}
     </div>
   );

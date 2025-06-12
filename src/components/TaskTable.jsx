@@ -112,16 +112,16 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
                 <div className="d-flex align-items-center gap-2 me-6">
                   {showSelection && (
                     <i
-  className={`bi fs-5 cursor-pointer ${
-    selectedTasks.length === tasks.length
-      ? 'bi-check-square-fill text-success'
-      : selectedTasks.length > 0
-      ? 'bi-dash-square-fill text-primary'
-      : 'bi-square'
-  }`}
-  onClick={handleSelectAllToggle}
-  title="Select All"
-/>
+                      className={`bi fs-5 cursor-pointer ${
+                        selectedTasks.length === tasks.length
+                          ? 'bi-check-square-fill text-success'
+                          : selectedTasks.length > 0
+                          ? 'bi-dash-square-fill text-primary'
+                          : 'bi-square'
+                      }`}
+                      onClick={handleSelectAllToggle}
+                      title="Select All"
+                    />
                   )}
                   <span style={{ minWidth: '300px', whiteSpace: 'nowrap' }}>
                     Tasks
@@ -179,28 +179,38 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
                       onClick={() => handleStarToggle(task.id)}
                     ></i>
 
-                    <span>{task.taskTitle}</span>
+                    <span>{task.taskTitle || 'None'}</span>
                   </div>
                 </td>
-                <td className="py-3 px-3">{task.dueDate || ''}</td>
+                <td className="py-3 px-3">{task.dueDate || 'None'}</td>
                 <td className="py-3 px-3">
-                  {task.assignees?.map((a) => a.label).join(', ') || ''}
+                  {task.assignees?.length
+                    ? task.assignees.map((a) => a.label).join(', ')
+                    : 'None'}
                 </td>
                 <td className="py-3 px-3">
                   {task.assignedBy ||
                     JSON.parse(localStorage.getItem('collabUser'))?.username ||
-                    ''}
+                    'None'}
                 </td>
                 <td className="py-3 px-3">
-                  {new Date(task.createdAt).toLocaleDateString()}
+                  {task.createdAt
+                    ? new Date(task.createdAt).toLocaleDateString()
+                    : 'None'}
                 </td>
                 <td className="py-3 px-3">
-                  {new Date(task.updatedAt || task.createdAt).toLocaleDateString()}
+                  {task.updatedAt
+                    ? new Date(task.updatedAt).toLocaleDateString()
+                    : task.createdAt
+                    ? new Date(task.createdAt).toLocaleDateString()
+                    : 'None'}
                 </td>
-                <td className="py-3 px-3">{task.status || ''}</td>
-                <td className="py-3 px-3">{task.priority || ''}</td>
+                <td className="py-3 px-3">{task.status || 'None'}</td>
+                <td className="py-3 px-3">{task.priority || 'None'}</td>
                 <td className="py-3 px-3">
-                  {task.collaborators?.map((c) => c.label).join(', ') || ''}
+                  {task.collaborators?.length
+                    ? task.collaborators.map((c) => c.label).join(', ')
+                    : 'None'}
                 </td>
                 <td className="py-3 px-3">
                   {task.attachments && task.attachments.length > 0 ? (
