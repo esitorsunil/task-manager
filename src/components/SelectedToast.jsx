@@ -1,5 +1,3 @@
-// components/SelectedToast.jsx
-import React from 'react';
 
 const SelectedToast = ({ count, onDeleteClick, onClearSelection }) => {
   if (count <= 0) return null;

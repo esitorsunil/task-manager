@@ -6,7 +6,6 @@ const store = configureStore({
   reducer: {
     attachments: attachmentsReducer,
     taskFilter: taskFilterReducer,
-    taskFilter: taskFilterReducer,
   },
 });
 

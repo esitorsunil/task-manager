@@ -1,4 +1,3 @@
-// components/SearchBar.jsx
 import { useDispatch, useSelector } from 'react-redux';
 import { setSearchQuery } from '../utils/searchFilterSlice';
 

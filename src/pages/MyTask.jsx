@@ -20,7 +20,6 @@ const MyTask = () => {
   return (
     <div>
       <h5>My Tasks</h5>
-      {/* Search & Filter Inputs */}
       <TaskTable tasks={myTasks} setTasks={setMyTasks} showSelection={true} />
     </div>
   );

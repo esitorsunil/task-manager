@@ -1,4 +1,3 @@
-// components/FilterDropdown.jsx
 import { useDispatch, useSelector } from 'react-redux';
 import { setFilter } from '../utils/searchFilterSlice';
 

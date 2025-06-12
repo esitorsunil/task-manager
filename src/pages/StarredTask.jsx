@@ -20,7 +20,6 @@ const StarredTask = () => {
         statusFilter === 'completed' ? task.isCompleted : !task.isCompleted
       );
     }
-
     setFilteredTasks(filtered);
   }, [statusFilter, starredTasks]);
 
