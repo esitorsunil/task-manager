@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import TaskTable from '../components/TaskTable';
+import TaskTable from '../ReuseComponent/TaskTable';
 
 const StarredTask = () => {
   const [starredTasks, setStarredTasks] = useState([]);

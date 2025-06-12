@@ -1,21 +1,28 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setFilter } from '../utils/searchFilterSlice';
+import SelectedToast from '../components/SelectedToast';
+import DeleteModal from '../components/DeleteModal';
+import SearchBar from '../components/SearchBar';
 
 const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
   const [selectedTasks, setSelectedTasks] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFilterOptions, setShowFilterOptions] = useState(false);
+
+  const dispatch = useDispatch();
+  const searchQuery = useSelector((state) => state.taskFilter.searchQuery);
+  const filter = useSelector((state) => state.taskFilter.filter);
 
   const handleTaskCompletion = (taskId) => {
     const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
     const updatedAllTasks = allTasks.map((t) =>
       t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t
     );
     localStorage.setItem('tasks', JSON.stringify(updatedAllTasks));
-
     const updatedTask = updatedAllTasks.find((t) => t.id === taskId);
-    let starredTasks = JSON.parse(localStorage.getItem('starredTasks')) || [];
 
+    let starredTasks = JSON.parse(localStorage.getItem('starredTasks')) || [];
     if (starredTasks.some((t) => t.id === updatedTask.id)) {
       starredTasks = starredTasks.map((t) =>
         t.id === updatedTask.id ? updatedTask : t
@@ -31,7 +38,6 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
 
   const handleStarToggle = (taskId) => {
     const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
     const updatedAllTasks = allTasks.map((t) =>
       t.id === taskId ? { ...t, isStarred: !t.isStarred } : t
     );
@@ -49,7 +55,6 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
     }
 
     localStorage.setItem('starredTasks', JSON.stringify(starredTasks));
-
     const updatedVisibleTasks = tasks.map((t) =>
       t.id === taskId ? { ...t, isStarred: !t.isStarred } : t
     );
@@ -92,30 +97,81 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
     setSelectedTasks([]);
   };
 
-  const displayedTasks = tasks.filter((task) =>
-    task.taskTitle?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const displayedTasks = tasks
+    .filter((task) =>
+      task.taskTitle?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .filter((task) => {
+      switch (filter) {
+        case 'completed':
+          return task.isCompleted;
+        case 'incomplete':
+          return !task.isCompleted;
+        case 'starred':
+          return task.isStarred;
+        case 'unstarred':
+          return !task.isStarred;
+        case 'dueThisWeek': {
+          const dueDate = new Date(task.dueDate);
+          const now = new Date();
+          const endOfWeek = new Date();
+          endOfWeek.setDate(now.getDate() + (7 - now.getDay()));
+          return dueDate >= now && dueDate <= endOfWeek;
+        }
+        case 'assignedByMe': {
+  const currentUser =
+    JSON.parse(localStorage.getItem('collabUser'))?.username || '';
+  return task.assignedBy === currentUser;
+}
+        case 'none':
+        default:
+          return true;
+      }
+    });
 
   return (
     <>
       <div className="d-flex justify-content-between align-items-center my-3 mt-5 flex-wrap gap-3">
-        <div
-          className="custom-input-group d-flex align-items-center"
-          style={{ minWidth: '100px' }}
-        >
-          <span className="input-group-text bg-white border-end-0">
-            <i className="bi bi-search text-muted"></i>
-          </span>
-          <input
-            type="text"
-            className="form-control border-start-0"
-            placeholder="Search"
-            aria-label="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <SearchBar />
+        <div className="d-flex gap-3">
+          <div className="position-relative">
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => setShowFilterOptions((prev) => !prev)}
+            >
+              <i className="bi bi-filter me-2"></i>
+              {filter === 'none' ? 'Filter' : filter}
+            </button>
+            {showFilterOptions && (
+              <ul
+                className="list-group position-absolute mt-2 shadow"
+                style={{ zIndex: 1000 }}
+              >
+                {[
+                  { label: 'None', value: 'none' },
+                  { label: 'Completed Tasks', value: 'completed' },
+                  { label: 'Incomplete Tasks', value: 'incomplete' },
+                  { label: 'Starred Tasks', value: 'starred' },
+                  { label: 'Unstarred Tasks', value: 'unstarred' },
+                  { label: 'Due This Week', value: 'dueThisWeek' },
+                  { label: 'Assigned by Me', value: 'assignedByMe' },
+                ].map((f) => (
+                  <li
+                    key={f.value}
+                    className="list-group-item list-group-item-action"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      dispatch(setFilter(f.value));
+                      setShowFilterOptions(false);
+                    }}
+                  >
+                    {f.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-        <div className="d-flex gap-3">{/* Future controls */}</div>
       </div>
 
       <div className="scroll-container">
@@ -323,79 +379,20 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
         </table>
       </div>
 
-      {showSelection && selectedTasks.length > 0 && (
-        <div
-          className="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"
-          style={{ zIndex: 9999 }}
-        >
-          <div className="toast show align-items-center text-white bg-primary border-0 rounded-5">
-            <div className="d-flex justify-content-between align-items-center px-3 py-3">
-              <div className="me-3 text-truncate">
-                {selectedTasks.length} task
-                {selectedTasks.length > 1 ? 's' : ''} selected
-              </div>
-              <div className="d-flex align-items-center">
-                <i
-                  className="bi bi-trash me-3"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => setShowDeleteModal(true)}
-                ></i>
-                <i
-                  className="bi bi-x-lg"
-                  onClick={() => setSelectedTasks([])}
-                  style={{ cursor: 'pointer' }}
-                ></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showDeleteModal && (
-        <div
-          className="modal fade show"
-          tabIndex="-1"
-          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
-          aria-modal="true"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Delete</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowDeleteModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                Are you sure you want to delete {selectedTasks.length} selected task
-                {selectedTasks.length > 1 ? 's' : ''}?
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowDeleteModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => {
-                    handleDelete();
-                    setShowDeleteModal(false);
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SelectedToast
+  count={selectedTasks.length}
+  onDeleteClick={() => setShowDeleteModal(true)}
+  onClearSelection={() => setSelectedTasks([])}
+/>
+     <DeleteModal
+  show={showDeleteModal}
+  count={selectedTasks.length}
+  onClose={() => setShowDeleteModal(false)}
+  onConfirm={() => {
+    handleDelete();              
+    setShowDeleteModal(false);     
+  }}
+/>
     </>
   );
 };

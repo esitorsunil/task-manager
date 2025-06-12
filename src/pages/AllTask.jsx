@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import TaskTable from '../components/TaskTable';
+import TaskTable from '../ReuseComponent/TaskTable';
 
 const AllTask = () => {
   const [tasks, setTasks] = useState([]);
