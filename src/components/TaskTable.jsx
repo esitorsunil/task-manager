@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
   const [selectedTasks, setSelectedTasks] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleTaskCompletion = (taskId) => {
     const allTasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -90,8 +92,32 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
     setSelectedTasks([]);
   };
 
+  const displayedTasks = tasks.filter((task) =>
+    task.taskTitle?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
+      <div className="d-flex justify-content-between align-items-center my-3 mt-5 flex-wrap gap-3">
+        <div
+          className="custom-input-group d-flex align-items-center"
+          style={{ minWidth: '100px' }}
+        >
+          <span className="input-group-text bg-white border-end-0">
+            <i className="bi bi-search text-muted"></i>
+          </span>
+          <input
+            type="text"
+            className="form-control border-start-0"
+            placeholder="Search"
+            aria-label="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="d-flex gap-3">{/* Future controls */}</div>
+      </div>
+
       <div className="scroll-container">
         <table
           className="table align-middle table-borderless table-hover mt-3"
@@ -140,140 +166,160 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
               <th className="py-3 px-3">ID</th>
             </tr>
           </thead>
-          <tbody>
-            {tasks.map((task) => (
-              <tr key={task.id} className="border-bottom">
-                <td
-                  className="py-3 px-3"
-                  style={{
-                    position: 'sticky',
-                    left: 0,
-                    backgroundColor: '#fff',
-                    zIndex: 1,
-                  }}
-                >
-                  <div className="d-flex align-items-center gap-2">
-                    {showSelection && (
-                      <i
-                        className={`bi fs-5 cursor-pointer ${
-                          selectedTasks.includes(task.id)
-                            ? 'bi-check-square-fill text-success'
-                            : 'bi-square'
-                        }`}
-                        onClick={() => handleSelectionToggle(task.id)}
-                      ></i>
-                    )}
-                    <i
-                      className={`bi ps-3 fs-5 ${
-                        task.isCompleted
-                          ? 'bi-check-circle-fill text-success'
-                          : 'bi-circle'
-                      } cursor-pointer`}
-                      onClick={() => handleTaskCompletion(task.id)}
-                    ></i>
 
-                    <i
-                      className={`bi fs-5 ${
-                        task.isStarred ? 'bi-star-fill text-warning' : 'bi-star'
-                      } cursor-pointer`}
-                      onClick={() => handleStarToggle(task.id)}
-                    ></i>
-
-                    <span>{task.taskTitle || 'None'}</span>
+          {displayedTasks.length === 0 ? (
+            <tbody>
+              <tr>
+                <td colSpan="11" className="text-center py-5">
+                  <div className="d-flex flex-column align-items-center justify-content-center">
+                    <img
+                      src="../../../public/download.svg"
+                      alt="No Data"
+                      style={{ width: '200px', height: 'auto' }}
+                    />
+                    <p className="text-muted mt-3">No tasks to display</p>
                   </div>
                 </td>
-                <td className="py-3 px-3">{task.dueDate || 'None'}</td>
-                <td className="py-3 px-3">
-                  {task.assignees?.length
-                    ? task.assignees.map((a) => a.label).join(', ')
-                    : 'None'}
-                </td>
-                <td className="py-3 px-3">
-                  {task.assignedBy ||
-                    JSON.parse(localStorage.getItem('collabUser'))?.username ||
-                    'None'}
-                </td>
-                <td className="py-3 px-3">
-                  {task.createdAt
-                    ? new Date(task.createdAt).toLocaleDateString()
-                    : 'None'}
-                </td>
-                <td className="py-3 px-3">
-                  {task.updatedAt
-                    ? new Date(task.updatedAt).toLocaleDateString()
-                    : task.createdAt
-                    ? new Date(task.createdAt).toLocaleDateString()
-                    : 'None'}
-                </td>
-                <td className="py-3 px-3">{task.status || 'None'}</td>
-                <td className="py-3 px-3">{task.priority || 'None'}</td>
-                <td className="py-3 px-3">
-                  {task.collaborators?.length
-                    ? task.collaborators.map((c) => c.label).join(', ')
-                    : 'None'}
-                </td>
-                <td className="py-3 px-3">
-                  {task.attachments && task.attachments.length > 0 ? (
-                    <div className="d-flex align-items-center gap-2">
-                      <button
-                        className="btn btn-sm p-0"
-                        onClick={() => {
-                          const index = task._currentFileIndex || 0;
-                          const newIndex =
-                            (index - 1 + task.attachments.length) %
-                            task.attachments.length;
-                          const updated = tasks.map((t) =>
-                            t.id === task.id
-                              ? { ...t, _currentFileIndex: newIndex }
-                              : t
-                          );
-                          setTasks(updated);
-                        }}
-                      >
-                        <i className="bi bi-chevron-left"></i>
-                      </button>
-
-                      <a
-                        href={task.attachments[task._currentFileIndex || 0]?.content}
-                        download={task.attachments[task._currentFileIndex || 0]?.name}
-                        className="text-decoration-none text-primary small"
-                        style={{
-                          maxWidth: '150px',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                        title={task.attachments[task._currentFileIndex || 0]?.name}
-                      >
-                        <i className="bi bi-paperclip"></i>{' '}
-                        {task.attachments[task._currentFileIndex || 0]?.name}
-                      </a>
-
-                      <button
-                        className="btn btn-sm p-0"
-                        onClick={() => {
-                          const index = task._currentFileIndex || 0;
-                          const newIndex =
-                            (index + 1) % task.attachments.length;
-                          const updated = tasks.map((t) =>
-                            t.id === task.id
-                              ? { ...t, _currentFileIndex: newIndex }
-                              : t
-                          );
-                          setTasks(updated);
-                        }}
-                      >
-                        <i className="bi bi-chevron-right"></i>
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-muted small">No attachments</span>
-                  )}
-                </td>
-                <td className="py-3 px-3 text-muted small">{task.id}</td>
               </tr>
-            ))}
-          </tbody>
+            </tbody>
+          ) : (
+            <tbody>
+              {displayedTasks.map((task) => (
+                <tr key={task.id} className="border-bottom">
+                  <td
+                    className="py-3 px-3"
+                    style={{
+                      position: 'sticky',
+                      left: 0,
+                      backgroundColor: '#fff',
+                      zIndex: 1,
+                    }}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      {showSelection && (
+                        <i
+                          className={`bi fs-5 cursor-pointer ${
+                            selectedTasks.includes(task.id)
+                              ? 'bi-check-square-fill text-success'
+                              : 'bi-square'
+                          }`}
+                          onClick={() => handleSelectionToggle(task.id)}
+                        ></i>
+                      )}
+                      <i
+                        className={`bi ps-3 fs-5 ${
+                          task.isCompleted
+                            ? 'bi-check-circle-fill text-success'
+                            : 'bi-circle'
+                        } cursor-pointer`}
+                        onClick={() => handleTaskCompletion(task.id)}
+                      ></i>
+
+                      <i
+                        className={`bi fs-5 ${
+                          task.isStarred
+                            ? 'bi-star-fill text-warning'
+                            : 'bi-star'
+                        } cursor-pointer`}
+                        onClick={() => handleStarToggle(task.id)}
+                      ></i>
+
+                      <span>{task.taskTitle || 'None'}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-3">{task.dueDate || 'None'}</td>
+                  <td className="py-3 px-3">
+                    {task.assignees?.length
+                      ? task.assignees.map((a) => a.label).join(', ')
+                      : 'None'}
+                  </td>
+                  <td className="py-3 px-3">
+                    {task.assignedBy ||
+                      JSON.parse(localStorage.getItem('collabUser'))?.username ||
+                      'None'}
+                  </td>
+                  <td className="py-3 px-3">
+                    {task.createdAt
+                      ? new Date(task.createdAt).toLocaleDateString()
+                      : 'None'}
+                  </td>
+                  <td className="py-3 px-3">
+                    {task.updatedAt
+                      ? new Date(task.updatedAt).toLocaleDateString()
+                      : task.createdAt
+                      ? new Date(task.createdAt).toLocaleDateString()
+                      : 'None'}
+                  </td>
+                  <td className="py-3 px-3">{task.status || 'None'}</td>
+                  <td className="py-3 px-3">{task.priority || 'None'}</td>
+                  <td className="py-3 px-3">
+                    {task.collaborators?.length
+                      ? task.collaborators.map((c) => c.label).join(', ')
+                      : 'None'}
+                  </td>
+                  <td className="py-3 px-3">
+                    {task.attachments && task.attachments.length > 0 ? (
+                      <div className="d-flex align-items-center gap-2">
+                        <button
+                          className="btn btn-sm p-0"
+                          onClick={() => {
+                            const index = task._currentFileIndex || 0;
+                            const newIndex =
+                              (index - 1 + task.attachments.length) %
+                              task.attachments.length;
+                            const updated = tasks.map((t) =>
+                              t.id === task.id
+                                ? { ...t, _currentFileIndex: newIndex }
+                                : t
+                            );
+                            setTasks(updated);
+                          }}
+                        >
+                          <i className="bi bi-chevron-left"></i>
+                        </button>
+
+                        <a
+                          href={task.attachments[task._currentFileIndex || 0]?.content}
+                          download={task.attachments[task._currentFileIndex || 0]?.name}
+                          className="text-decoration-none text-primary small"
+                          style={{
+                            maxWidth: '150px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                          title={task.attachments[task._currentFileIndex || 0]?.name}
+                        >
+                          <i className="bi bi-paperclip"></i>{' '}
+                          {task.attachments[task._currentFileIndex || 0]?.name}
+                        </a>
+
+                        <button
+                          className="btn btn-sm p-0"
+                          onClick={() => {
+                            const index = task._currentFileIndex || 0;
+                            const newIndex =
+                              (index + 1) % task.attachments.length;
+                            const updated = tasks.map((t) =>
+                              t.id === task.id
+                                ? { ...t, _currentFileIndex: newIndex }
+                                : t
+                            );
+                            setTasks(updated);
+                          }}
+                        >
+                          <i className="bi bi-chevron-right"></i>
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-muted small">No attachments</span>
+                    )}
+                  </td>
+                  <td className="py-3 px-3 text-muted small">{task.id}</td>
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
       </div>
 
@@ -292,13 +338,59 @@ const TaskTable = ({ tasks, setTasks, showSelection = false }) => {
                 <i
                   className="bi bi-trash me-3"
                   style={{ cursor: 'pointer' }}
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteModal(true)}
                 ></i>
                 <i
                   className="bi bi-x-lg"
                   onClick={() => setSelectedTasks([])}
                   style={{ cursor: 'pointer' }}
                 ></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div
+          className="modal fade show"
+          tabIndex="-1"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Delete</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowDeleteModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                Are you sure you want to delete {selectedTasks.length} selected task
+                {selectedTasks.length > 1 ? 's' : ''}?
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => {
+                    handleDelete();
+                    setShowDeleteModal(false);
+                  }}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>
